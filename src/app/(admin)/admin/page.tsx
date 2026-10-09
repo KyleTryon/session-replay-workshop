@@ -23,10 +23,10 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
     <div className="space-y-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-display font-semibold tracking-tight text-4xl">Organizer dashboard</h1>
+          <h1 data-sentry-unmask className="font-display font-semibold tracking-tight text-4xl">Organizer dashboard</h1>
           <p className="mt-1 text-ink/60">{event.title} · {formatDate(event.date)}</p>
         </div>
-        <nav className="flex flex-wrap gap-2 text-sm">
+        <nav data-sentry-unmask className="flex flex-wrap gap-2 text-sm">
           {EVENTS.map((e) => (
             <Link
               key={e.id}
@@ -39,7 +39,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/admin">) {
         </nav>
       </div>
 
-      <section className="card overflow-x-auto">
+      <section data-sentry-block className="card overflow-x-auto">
         <h2 className="mb-3 font-display font-semibold tracking-tight text-xl">Attendees ({attendees.length})</h2>
         <table className="w-full text-left text-sm">
           <thead className="text-ink/50">

@@ -8,7 +8,9 @@ import { SessionReplayProvider } from "@/components/session-replay-provider";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SessionReplayProvider name="browse" mode="off">
-      {children}
+      <div data-sentry-unmask className="contents">
+        {children}
+      </div>
     </SessionReplayProvider>
   );
 }

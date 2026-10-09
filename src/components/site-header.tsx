@@ -20,7 +20,7 @@ export function SiteHeader({ user, users, beta }: { user: User; users: User[]; b
   const [betaOn, setBetaOn] = useOptimistic(beta);
 
   return (
-    <header className="border-b border-ink/10 bg-paper/80 backdrop-blur sticky top-0 z-20">
+    <header data-sentry-unmask className="border-b border-ink/10 bg-paper/80 backdrop-blur sticky top-0 z-20">
       <div className="mx-auto max-w-5xl px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">
         <Link href="/" className="font-display font-semibold text-xl tracking-tight">
           <span className="text-brand">●</span> Meetup<span className="text-ink/40">.local</span>

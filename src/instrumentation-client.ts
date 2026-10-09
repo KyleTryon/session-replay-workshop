@@ -9,7 +9,14 @@ Sentry.init({
   integrations: [
     // Installed but idle: with both sample rates at 0, nothing records
     // until a <SessionReplayProvider> starts it (src/lib/replay/policies.ts).
-    Sentry.replayIntegration(),
+    Sentry.replayIntegration({
+      maskAllText: true,
+      maskAllInputs: true,
+      blockAllMedia: true,
+      // No default for unmask, so we pick one. Nearest ancestor wins:
+      // data-sentry-mask inside an unmasked area is masked again.
+      unmask: ["[data-sentry-unmask]"],
+    }),
     // Records flag evaluations on error events, so issues show which
     // flags were on. Pairs with the hook added in flags-provider.tsx.
     Sentry.openFeatureIntegration(),

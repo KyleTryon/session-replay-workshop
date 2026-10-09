@@ -56,7 +56,9 @@ export function SubmitWizard({
       <div className="card mt-8 text-center">
         <p className="text-4xl">🎤</p>
         <h2 className="mt-2 font-display font-semibold tracking-tight text-2xl">Submitted!</h2>
-        <p className="mt-1 text-ink/60">We&apos;ll be in touch. Reference: {submittedId}</p>
+        <p className="mt-1 text-ink/60">
+          We&apos;ll be in touch. Reference: <span data-sentry-mask>{submittedId}</span>
+        </p>
         <Link href="/events" className="btn mt-4">Back to events</Link>
       </div>
     );
@@ -75,15 +77,16 @@ export function SubmitWizard({
         ))}
       </ol>
 
-      <div className="card space-y-5">
+      {/* Masked: what people type. Unmasked: the labels and buttons around it. */}
+      <div data-sentry-mask className="card space-y-5">
         {step === 0 && (
           <>
             <div>
-              <label className="label" htmlFor="speakerName">Name</label>
+              <label data-sentry-unmask className="label" htmlFor="speakerName">Name</label>
               <input id="speakerName" className="field" value={draft.speakerName} onChange={(e) => update("speakerName", e.target.value)} />
             </div>
             <div>
-              <label className="label" htmlFor="speakerEmail">Email</label>
+              <label data-sentry-unmask className="label" htmlFor="speakerEmail">Email</label>
               <input id="speakerEmail" type="email" className="field" value={draft.speakerEmail} onChange={(e) => update("speakerEmail", e.target.value)} />
             </div>
           </>
@@ -92,7 +95,7 @@ export function SubmitWizard({
         {step === 1 && (
           <>
             <div>
-              <label className="label" htmlFor="eventId">Which event?</label>
+              <label data-sentry-unmask className="label" htmlFor="eventId">Which event?</label>
               <select id="eventId" className="field" value={draft.eventId} onChange={(e) => update("eventId", e.target.value)}>
                 {events.map((e) => (
                   <option key={e.id} value={e.id}>{e.title}</option>
@@ -100,14 +103,14 @@ export function SubmitWizard({
               </select>
             </div>
             <div>
-              <label className="label" htmlFor="title">Talk title</label>
+              <label data-sentry-unmask className="label" htmlFor="title">Talk title</label>
               <input id="title" className="field" placeholder="I replaced my build tool and lived" value={draft.title} onChange={(e) => update("title", e.target.value)} />
             </div>
             <fieldset>
-              <legend className="label">Format</legend>
+              <legend data-sentry-unmask className="label">Format</legend>
               <div className="grid gap-2 sm:grid-cols-3">
                 {FORMATS.map((f) => (
-                  <label key={f.value} className={`cursor-pointer rounded-lg border p-3 text-sm ${draft.format === f.value ? "border-brand bg-brand/5" : "border-ink/15"}`}>
+                  <label data-sentry-unmask key={f.value} className={`cursor-pointer rounded-lg border p-3 text-sm ${draft.format === f.value ? "border-brand bg-brand/5" : "border-ink/15"}`}>
                     <input type="radio" name="format" className="sr-only" checked={draft.format === f.value} onChange={() => update("format", f.value)} />
                     <span className="font-medium">{f.label}</span>
                     <span className="block text-xs text-ink/60">{f.detail}</span>
@@ -116,7 +119,7 @@ export function SubmitWizard({
               </div>
             </fieldset>
             <div>
-              <label className="label" htmlFor="audience">Who is it for? <span className="font-normal text-ink/40">(optional)</span></label>
+              <label data-sentry-unmask className="label" htmlFor="audience">Who is it for? <span className="font-normal text-ink/40">(optional)</span></label>
               <select id="audience" className="field" value={draft.audience} onChange={(e) => update("audience", e.target.value)}>
                 {AUDIENCES.map((a) => (
                   <option key={a.value} value={a.value}>{a.label}</option>
@@ -128,8 +131,8 @@ export function SubmitWizard({
 
         {step === 2 && (
           <div>
-            <div className="mb-1 flex items-center justify-between">
-              <label className="label mb-0" htmlFor="abstract">Abstract</label>
+            <div data-sentry-unmask className="mb-1 flex items-center justify-between">
+              <label data-sentry-unmask className="label mb-0" htmlFor="abstract">Abstract</label>
               {aiHelper && (
                 <button
                   type="button"
@@ -148,14 +151,14 @@ export function SubmitWizard({
               value={draft.abstract}
               onChange={(e) => update("abstract", e.target.value)}
             />
-            <p className="mt-1 text-right text-xs text-ink/50">
+            <p data-sentry-unmask className="mt-1 text-right text-xs text-ink/50">
               {draft.abstract.length} / {ABSTRACT_LIMIT}
             </p>
           </div>
         )}
 
         {step === 3 && (
-          <dl className="grid grid-cols-[120px_1fr] gap-y-2 text-sm">
+          <dl data-sentry-mask className="grid grid-cols-[120px_1fr] gap-y-2 text-sm">
             <dt className="text-ink/50">Speaker</dt>
             <dd>{draft.speakerName} ({draft.speakerEmail})</dd>
             <dt className="text-ink/50">Event</dt>
@@ -169,7 +172,7 @@ export function SubmitWizard({
           </dl>
         )}
 
-        <div className="flex justify-between border-t border-ink/10 pt-4">
+        <div data-sentry-unmask className="flex justify-between border-t border-ink/10 pt-4">
           <button type="button" className="btn btn-ghost" disabled={step === 0} onClick={() => setStep((s) => s - 1)}>
             Back
           </button>
