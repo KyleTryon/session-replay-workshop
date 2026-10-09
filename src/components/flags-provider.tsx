@@ -1,10 +1,15 @@
 "use client";
 
 import { OpenFeature, OpenFeatureProvider } from "@openfeature/react-sdk";
+import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
 import { flagProvider } from "@/lib/flags";
 
 OpenFeature.setProvider(flagProvider);
+// Client components also render on the server; the Sentry hook is browser-only.
+if (typeof window !== "undefined") {
+  OpenFeature.addHooks(new Sentry.OpenFeatureIntegrationHook());
+}
 
 export function FlagsProvider({
   userId,

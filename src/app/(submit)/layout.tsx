@@ -1,14 +1,12 @@
 // Section: submit
 // Talk submission wizard. The funnel we actually want to watch.
 //
-// Policy: record 100% of visits.
+// Policy: 10% of visitors, plus 100% of anyone with the
+// `ai-abstract-helper` flag on. The flag lives in client-side OpenFeature,
+// so the decision happens in a client component.
 
-import { SessionReplayProvider } from "@/components/session-replay-provider";
+import { SubmitReplayProvider } from "@/components/submit-replay-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return (
-    <SessionReplayProvider name="submit" mode="session">
-      {children}
-    </SessionReplayProvider>
-  );
+  return <SubmitReplayProvider>{children}</SubmitReplayProvider>;
 }
