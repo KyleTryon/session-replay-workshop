@@ -11,6 +11,8 @@ export type ReplayPolicy = {
   mode: ReplayMode;
   /** 0..1. Chance that a visitor gets `mode` instead of "off". */
   sampleRate: number;
+  /** If the visitor leaves while it's buffering, send the buffer. */
+  sendOnLeave?: boolean;
 };
 
 type ActivePolicy = ReplayPolicy & { depth: number };
@@ -31,6 +33,7 @@ export function addPolicy(id: string, policy: ActivePolicy) {
 }
 
 export function removePolicy(id: string) {
+  if (active.get(id)?.sendOnLeave) enqueue(() => sendIfGone(id));
   active.delete(id);
   update();
 }
@@ -67,6 +70,13 @@ async function apply() {
   if (current !== "off") await replay.stop();
   if (target === "session") replay.start();
   if (target === "buffer") replay.startBuffering();
+}
+
+// Checked once queued tasks run, not on unmount: React remounts providers
+// in development, and one whose props change is removed and re-added.
+async function sendIfGone(id: string) {
+  const replay = Sentry.getReplay();
+  if (!active.has(id) && replay?.getRecordingMode() === "buffer") await replay.flush();
 }
 
 let watching = false;

@@ -1,14 +1,25 @@
 "use client";
 
 import { useBooleanFlagValue } from "@openfeature/react-sdk";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 import { useState } from "react";
 import { submitTalk } from "@/app/actions";
+import { useSessionReplay } from "@/components/session-replay-provider";
 import { draftAbstract } from "@/lib/abstract-helper";
 import { FLAGS } from "@/lib/flags";
 import { ABSTRACT_LIMIT, AUDIENCES, FORMATS, type TalkDraft, validateStep } from "@/lib/talk";
 
 const STEPS = ["About you", "Your talk", "Abstract", "Review"];
+
+/**
+ * One count per step completed. Chart it grouped by `step` and the drops
+ * between bars are where people give up. Metrics carry the ID of any
+ * replay that's running, so you can go from a drop to the replays.
+ */
+function funnelStep(step: string) {
+  Sentry.metrics.count("submit_funnel", 1, { attributes: { step } });
+}
 
 export function SubmitWizard({
   events,
@@ -34,6 +45,7 @@ export function SubmitWizard({
 
   function next() {
     if (!validateStep(step, draft)) return;
+    funnelStep(STEPS[step]);
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
   }
 
@@ -47,22 +59,12 @@ export function SubmitWizard({
       format: draft.format,
       abstract: draft.abstract,
     });
+    funnelStep("Submitted");
     setSubmittedId(id);
     setSubmitting(false);
   }
 
-  if (submittedId) {
-    return (
-      <div className="card mt-8 text-center">
-        <p className="text-4xl">🎤</p>
-        <h2 className="mt-2 font-display font-semibold tracking-tight text-2xl">Submitted!</h2>
-        <p className="mt-1 text-ink/60">
-          We&apos;ll be in touch. Reference: <span data-sentry-mask>{submittedId}</span>
-        </p>
-        <Link href="/events" className="btn mt-4">Back to events</Link>
-      </div>
-    );
-  }
+  if (submittedId) return <Submitted id={submittedId} />;
 
   return (
     <div className="mt-8">
@@ -185,6 +187,25 @@ export function SubmitWizard({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/**
+ * Finished the funnel: nothing left to watch. Turning recording off here
+ * means the buffer is never sent, so only people who quit are.
+ */
+function Submitted({ id }: { id: string }) {
+  useSessionReplay({ name: "submit-done", mode: "off" });
+
+  return (
+    <div className="card mt-8 text-center">
+      <p className="text-4xl">🎤</p>
+      <h2 className="mt-2 font-display font-semibold tracking-tight text-2xl">Submitted!</h2>
+      <p className="mt-1 text-ink/60">
+        We&apos;ll be in touch. Reference: <span data-sentry-mask>{id}</span>
+      </p>
+      <Link href="/events" className="btn mt-4">Back to events</Link>
     </div>
   );
 }

@@ -9,6 +9,8 @@ type SessionReplayOptions = {
   mode?: ReplayMode;
   /** 0..1. Chance that a visitor gets `mode` instead of "off". */
   sampleRate?: number;
+  /** If the visitor leaves while it's buffering, send the buffer. */
+  sendOnLeave?: boolean;
 };
 
 // How deeply providers are nested here. The innermost one wins.
@@ -20,14 +22,14 @@ const Depth = createContext(0);
  *
  *   useSessionReplay({ name: "checkout", mode: "session" });
  */
-export function useSessionReplay({ name, mode = "session", sampleRate = 1 }: SessionReplayOptions) {
+export function useSessionReplay({ name, mode = "session", sampleRate = 1, sendOnLeave = false }: SessionReplayOptions) {
   const id = useId();
   const depth = use(Depth) + 1;
 
   useEffect(() => {
-    addPolicy(id, { name, mode, sampleRate, depth });
+    addPolicy(id, { name, mode, sampleRate, sendOnLeave, depth });
     return () => removePolicy(id);
-  }, [id, name, mode, sampleRate, depth]);
+  }, [id, name, mode, sampleRate, sendOnLeave, depth]);
 }
 
 /**
