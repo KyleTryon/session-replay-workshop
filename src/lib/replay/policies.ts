@@ -75,6 +75,16 @@ function watch() {
   if (watching || !client) return;
   watching = true;
 
+  // A buffered replay is only sent for errors tagged with its ID, and with
+  // replaysOnErrorSampleRate at 0 the SDK doesn't add that tag. So we do,
+  // and the SDK flushes the buffer once the error has been sent.
+  client.on("preprocessEvent", (event) => {
+    const replay = Sentry.getReplay();
+    if (!event.type && event.exception && replay?.getRecordingMode() === "buffer") {
+      event.tags = { ...event.tags, replayId: replay.getReplayId() };
+    }
+  });
+
   // Replays end after 15 minutes idle or 60 minutes total. Start the
   // current policy's again (after stop() has finished).
   client.on("replayEnd", ({ reason }) => {
