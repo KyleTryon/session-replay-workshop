@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FlagsProvider } from "@/components/flags-provider";
+import { ReplayDebugBadge } from "@/components/replay-debug-badge";
 import { SiteHeader } from "@/components/site-header";
 import { USERS } from "@/lib/data";
 import { getSession } from "@/lib/session";
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <footer className="mx-auto w-full max-w-5xl px-4 py-6 text-xs text-ink/40">
             Demo app for the &ldquo;Record what matters&rdquo; Session Replay workshop. All data is fake.
           </footer>
+          <ReplayDebugBadge />
         </FlagsProvider>
       </body>
     </html>

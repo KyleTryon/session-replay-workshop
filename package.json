@@ -12,6 +12,7 @@
   "dependencies": {
     "@openfeature/react-sdk": "^1.4.1",
     "@openfeature/web-sdk": "^1.10.0",
+    "@sentry/nextjs": "^11.6.0",
     "next": "16.4.3",
     "react": "19.3.0",
     "react-dom": "19.3.0",
