@@ -1,8 +1,14 @@
 // Section: account
 // Profile + notification settings. Low value, personal data.
 //
-// Replay policy for this section gets added here in the workshop.
+// Policy: Never record. Low value, personal data.
+
+import { SessionReplayProvider } from "@/components/session-replay-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <SessionReplayProvider name="account" mode="off">
+      {children}
+    </SessionReplayProvider>
+  );
 }

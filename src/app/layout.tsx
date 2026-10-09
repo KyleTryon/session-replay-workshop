@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FlagsProvider } from "@/components/flags-provider";
 import { ReplayDebugBadge } from "@/components/replay-debug-badge";
+import { SessionReplayProvider } from "@/components/session-replay-provider";
 import { SiteHeader } from "@/components/site-header";
 import { USERS } from "@/lib/data";
 import { getSession } from "@/lib/session";
@@ -25,12 +26,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col font-sans">
         <FlagsProvider userId={user.id} role={user.role} beta={beta}>
-          <SiteHeader user={user} users={USERS} beta={beta} />
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
-          <footer className="mx-auto w-full max-w-5xl px-4 py-6 text-xs text-ink/40">
-            Demo app for the &ldquo;Record what matters&rdquo; Session Replay workshop. All data is fake.
-          </footer>
-          <ReplayDebugBadge />
+          {/* The app-wide default: 10% of sessions. Sections override it in their own layouts. */}
+          <SessionReplayProvider name="app" mode="session" sampleRate={0.1}>
+            <SiteHeader user={user} users={USERS} beta={beta} />
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
+            <footer className="mx-auto w-full max-w-5xl px-4 py-6 text-xs text-ink/40">
+              Demo app for the &ldquo;Record what matters&rdquo; Session Replay workshop. All data is fake.
+            </footer>
+            <ReplayDebugBadge />
+          </SessionReplayProvider>
         </FlagsProvider>
       </body>
     </html>

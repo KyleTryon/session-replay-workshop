@@ -1,7 +1,8 @@
 // Section: admin
 // Organizer dashboard. Attendee PII everywhere.
 //
-// Replay policy for this section gets added here in the workshop.
+// Policy: no provider of its own, so it inherits the app default from the
+// root layout (10% of sessions). Replay masks all text by default.
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   return children;

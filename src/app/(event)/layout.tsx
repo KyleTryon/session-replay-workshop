@@ -1,8 +1,14 @@
 // Section: event
 // Event detail + RSVP. We only care when something breaks.
 //
-// Replay policy for this section gets added here in the workshop.
+// Policy: off for now. We only care when the RSVP breaks (see 03-buffer).
+
+import { SessionReplayProvider } from "@/components/session-replay-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <SessionReplayProvider name="event" mode="off">
+      {children}
+    </SessionReplayProvider>
+  );
 }

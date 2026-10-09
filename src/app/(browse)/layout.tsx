@@ -1,8 +1,14 @@
 // Section: browse
 // Landing page + event list. High traffic, low insight.
 //
-// Replay policy for this section gets added here in the workshop.
+// Policy: Never record. High traffic, nothing to learn.
+
+import { SessionReplayProvider } from "@/components/session-replay-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <SessionReplayProvider name="browse" mode="off">
+      {children}
+    </SessionReplayProvider>
+  );
 }

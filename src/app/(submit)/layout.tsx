@@ -1,8 +1,14 @@
 // Section: submit
 // Talk submission wizard. The funnel we actually want to watch.
 //
-// Replay policy for this section gets added here in the workshop.
+// Policy: record 100% of visits.
+
+import { SessionReplayProvider } from "@/components/session-replay-provider";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <SessionReplayProvider name="submit" mode="session">
+      {children}
+    </SessionReplayProvider>
+  );
 }
