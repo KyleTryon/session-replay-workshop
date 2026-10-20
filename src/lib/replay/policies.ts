@@ -22,6 +22,7 @@ type ActivePolicy = ReplayPolicy & { depth: number };
 // queued tasks below make Replay match.
 const active = new Map<string, ActivePolicy>();
 let wanted: ReplayMode = "off";
+let current = "none";
 // One roll per policy per page load, so leaving and coming back
 // isn't a second chance to be sampled.
 const rolls = new Map<string, boolean>();
@@ -33,7 +34,8 @@ export function addPolicy(id: string, policy: ActivePolicy) {
 }
 
 export function removePolicy(id: string) {
-  if (active.get(id)?.sendOnLeave) enqueue(() => sendIfGone(id));
+  const policy = active.get(id);
+  if (policy?.sendOnLeave) enqueue(() => sendIfGone(id, policy.name));
   active.delete(id);
   update();
 }
@@ -44,7 +46,8 @@ function update() {
 
   if (policy && !rolls.has(policy.name)) rolls.set(policy.name, Math.random() < policy.sampleRate);
   wanted = policy && rolls.get(policy.name) ? policy.mode : "off";
-  Sentry.setTag("replay.policy", policy?.name ?? "none");
+  current = policy?.name ?? "none";
+  Sentry.setTag("replay.policy", current);
   enqueue(apply);
 }
 
@@ -74,9 +77,13 @@ async function apply() {
 
 // Checked once queued tasks run, not on unmount: React remounts providers
 // in development, and one whose props change is removed and re-added.
-async function sendIfGone(id: string) {
+async function sendIfGone(id: string, name: string) {
   const replay = Sentry.getReplay();
-  if (!active.has(id) && replay?.getRecordingMode() === "buffer") await replay.flush();
+  if (active.has(id) || replay?.getRecordingMode() !== "buffer") return;
+  // The tag already names the next section; send the buffer under its own.
+  Sentry.setTag("replay.policy", name);
+  await replay.flush();
+  Sentry.setTag("replay.policy", current);
 }
 
 let watching = false;
