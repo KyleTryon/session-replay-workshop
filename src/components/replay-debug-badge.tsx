@@ -38,13 +38,15 @@ export function ReplayDebugBadge() {
       // A buffer turns into a session once it finishes uploading after an
       // error. The SDK doesn't announce that, so look again a moment later.
       client.on("afterSendEvent", () => setTimeout(update, 1000)),
+      // Opening "Report a bug" sends the buffer the same way.
+      client.on("openFeedbackWidget", () => setTimeout(update, 1000)),
     ];
     return () => off.forEach((unsubscribe) => unsubscribe());
   }, []);
 
   return (
     <div
-      className={`fixed bottom-4 right-4 z-50 rounded-full px-3 py-1.5 font-mono text-xs shadow-lg ${STYLES[status.mode]}`}
+      className={`fixed bottom-4 left-4 z-50 rounded-full px-3 py-1.5 font-mono text-xs shadow-lg ${STYLES[status.mode]}`}
       title={status.id ? `replay ${status.id}` : undefined}
     >
       {LABELS[status.mode]}

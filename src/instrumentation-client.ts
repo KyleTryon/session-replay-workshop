@@ -17,6 +17,17 @@ Sentry.init({
       // data-sentry-mask inside an unmasked area is masked again.
       unmask: ["[data-sentry-unmask]"],
     }),
+    // The "Report a bug" button, bottom right. Opening it sends whatever
+    // Replay is holding (a buffer or a running session) and links that
+    // replay to the feedback. Where no policy is buffering or recording,
+    // feedback arrives without a replay.
+    Sentry.feedbackIntegration({
+      colorScheme: "light",
+      triggerLabel: "Report a bug",
+      formTitle: "Report a bug",
+      submitButtonLabel: "Send report",
+      messagePlaceholder: "What went wrong? What did you expect?",
+    }),
     // Records flag evaluations on error events, so issues show which
     // flags were on. Pairs with the hook added in flags-provider.tsx.
     Sentry.openFeatureIntegration(),

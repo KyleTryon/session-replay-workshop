@@ -69,6 +69,12 @@ Fix: fall back to a default tone.
    `submit_funnel` by `step`, find the drop at "Abstract", and open the
    replay behind it. Then submit a talk successfully to show that people
    who finish aren't sent.
+7. **`07-feedback`**: on an event page, double-click **RSVP** (bug #1), then
+   click **Report a bug** and describe it. In Sentry, open the feedback: the
+   replay shows the double-click and the error. Then report a bug from
+   `/events` and compare: `browse` is `off`, so that report has no replay.
+   Point out the root default is now `buffer`, which costs no quota until
+   something (an error or a report) sends it.
 
 ## Gotchas worth calling out (all hit while building this)
 
@@ -105,3 +111,15 @@ Fix: fall back to a default tone.
   `data-sentry-mask` and only the labels and buttons are unmasked.
 - **There's no default `unmask` selector.** `.sentry-unmask` does nothing
   unless you configure it. `mask`, `block`, and `ignore` do have defaults.
+- **Feedback sends the replay when the form opens, not when it's sent.**
+  Someone who opens **Report a bug** and cancels still uploads their buffer
+  (and keeps recording until they leave that section). Budget for opens,
+  not reports.
+- **Sentry's docs assume `replaysOnErrorSampleRate > 0` for feedback.** That
+  keeps every page buffering. Here both rates are 0, so feedback carries a
+  replay only where a policy buffers or records, which is why `07-feedback`
+  makes `buffer` the app default.
+- **Screenshots aren't masked.** "Add a screenshot" in the feedback form
+  captures the page as the user sees it, so the attendee table that
+  `data-sentry-block` keeps out of replays can end up in a screenshot. Pass
+  `enableScreenshot: false` to `feedbackIntegration()` if that matters.

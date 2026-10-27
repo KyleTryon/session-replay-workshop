@@ -51,8 +51,9 @@ git checkout 00-start
 | `04-flags` | Record 100% of the beta cohort on `/submit`, 10% of everyone else; send flag evaluations to Sentry |
 | `05-privacy` | Masking, blocking, and unmasking. Keep PII sections out entirely |
 | `06-funnels` | Count each step of the talk wizard; send replays only for people who give up |
+| `07-feedback` | Add Sentry's "Report a bug" widget; the app default becomes `buffer`, so feedback arrives with the replay behind it |
 
-`main` is the finished state (the same as `06-funnels`).
+`main` is the finished state (the same as `07-feedback`).
 
 - **Fall behind?** `git checkout <branch>` and keep going. If you changed
   files, `git stash` first (or `git checkout -f <branch>` to throw your
@@ -118,7 +119,7 @@ Sentry.init({
 
 ```tsx
 // src/app/layout.tsx: the default for the whole app
-<SessionReplayProvider name="app" mode="session" sampleRate={0.1}>…</SessionReplayProvider>
+<SessionReplayProvider name="app" mode="buffer">…</SessionReplayProvider>
 
 // src/app/(event)/layout.tsx: this section overrides it
 <SessionReplayProvider name="event" mode="buffer">{children}</SessionReplayProvider>
@@ -135,20 +136,20 @@ Funnels below):
 | Mode | What Replay does |
 |---|---|
 | `off` | Nothing |
-| `buffer` | Keeps the last ~60 seconds in memory and sends it only if an error happens |
+| `buffer` | Keeps the last ~60 seconds in memory and sends it only if an error happens or someone opens "Report a bug" |
 | `session` | Records and sends everything |
 
 The policies on `main` (earlier steps build up to these):
 
 | Policy | Mode | Rate | Why |
 |---|---|---|---|
-| `app` (root layout) | `session` | 10% | The default for anything without its own provider |
+| `app` (root layout) | `buffer` | 100% | The default for anything without its own provider. Until `07-feedback` it was `session` at 10% |
 | `browse` | `off` | | High traffic, nothing to learn |
 | `event` | `buffer` | 100% | Only interesting when the RSVP breaks |
 | `submit` | `buffer`, sent if they leave without submitting | 100% | Stable funnel: watch only the people who give up |
 | `submit-beta` | `session` | 100% | Beta flag on: watch everyone using the new helper |
 | `account` | `off` | | Low value, personal data |
-| `admin` | inherits `app` | 10% | No provider of its own; the attendee table is blocked |
+| `admin` | inherits `app` (`buffer`) | 100% | No provider of its own; the attendee table is blocked |
 
 ### 3. Keeping Replay in sync (`02-providers`)
 
@@ -225,12 +226,37 @@ finish are never sent. Only the people who quit are.
 
 In this app the drop is at **Abstract**, and the replays show why.
 
+### 8. Feedback with the replay behind it (`07-feedback`)
+
+`Sentry.feedbackIntegration()` in `instrumentation-client.ts` adds the
+**Report a bug** button (bottom right). When someone opens it, Replay sends
+whatever it's holding: a buffer is uploaded (the ~60 seconds before they
+clicked) and keeps recording as a session, and a running session is
+flushed. The feedback is linked to that replay, so in Sentry (User
+Feedback) each report has the replay of what they were doing.
+
+That only works where a policy is buffering or recording, so the root
+layout's default changes from `session` at 10% to `buffer`:
+
+```tsx
+<SessionReplayProvider name="app" mode="buffer">
+```
+
+Buffering costs no replay quota. Nothing is sent until there's a reason
+(an error, or a bug report), so it's the cheapest sensible default. The
+sections that are deliberately `off` (`browse`, `account`) stay off, and
+feedback from them arrives without a replay.
+
+`src/components/sentry-user.tsx` calls `Sentry.setUser()` with the
+signed-in user, so the form prefills name and email (and errors and
+replays carry the user too).
+
 ### Also in the box (`01-naive`)
 
 - **Ad blockers.** `tunnelRoute: "/sentry-tunnel"` in `next.config.ts` sends
   Sentry traffic through the app, and `src/app/sentry-tunnel/route.ts`
   forwards only the event to Sentry, not cookies or headers.
-- **Debug badge.** Bottom right: `○ not recording`, `◐ buffering`, or
+- **Debug badge.** Bottom left (the feedback button has bottom right): `○ not recording`, `◐ buffering`, or
   `● REC session`, plus the replay ID.
 
 ## Use it in your app
@@ -271,6 +297,10 @@ provider, so that buffer isn't sent.
 4. Turn on **Beta features** and open **Submit a talk**: recording.
 5. In Sentry, chart `submit_funnel` by `step`, and filter issues and
    replays by the `replay.policy` tag or the `ai-abstract-helper` flag.
+6. Open an event and click **Report a bug**: the badge switches from
+   buffering to recording. Send the report, then open it in Sentry under
+   User Feedback: the replay is attached. Report a bug from `/events`
+   (`browse`, off) and it arrives without one.
 
 Replays shorter than 5 seconds are dropped, so stay a moment on each page.
 

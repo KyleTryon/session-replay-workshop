@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { FlagsProvider } from "@/components/flags-provider";
 import { ReplayDebugBadge } from "@/components/replay-debug-badge";
+import { SentryUser } from "@/components/sentry-user";
 import { SessionReplayProvider } from "@/components/session-replay-provider";
 import { SiteHeader } from "@/components/site-header";
 import { USERS } from "@/lib/data";
@@ -26,11 +27,16 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col font-sans">
         <FlagsProvider userId={user.id} role={user.role} beta={beta}>
-          {/* The app-wide default: 10% of sessions. Sections override it in their own layouts. */}
-          <SessionReplayProvider name="app" mode="session" sampleRate={0.1}>
+          {/*
+            The app-wide default: buffer the last ~60 seconds and send them only
+            when there's a reason (an error, or someone opening "Report a bug").
+            Buffering costs no quota. Sections override it in their own layouts.
+          */}
+          <SessionReplayProvider name="app" mode="buffer">
+            <SentryUser id={user.id} name={user.name} email={user.email} />
             <SiteHeader user={user} users={USERS} beta={beta} />
             <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">{children}</main>
-            <footer className="mx-auto w-full max-w-5xl px-4 py-6 text-xs text-ink/40">
+            <footer className="mx-auto w-full max-w-5xl px-4 pt-6 pb-16 text-xs text-ink/40">
               Demo app for the &ldquo;Record what matters&rdquo; Session Replay workshop. All data is fake.
             </footer>
             <ReplayDebugBadge />
