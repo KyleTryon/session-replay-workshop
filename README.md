@@ -227,8 +227,9 @@ In this app the drop is at **Abstract**, and the replays show why.
 
 ### Also in the box (`01-naive`)
 
-- **Ad blockers.** `tunnelRoute: "/monitoring"` in `next.config.ts` sends
-  Sentry traffic through the app.
+- **Ad blockers.** `tunnelRoute: "/sentry-tunnel"` in `next.config.ts` sends
+  Sentry traffic through the app, and `src/app/sentry-tunnel/route.ts`
+  forwards only the event to Sentry, not cookies or headers.
 - **Debug badge.** Bottom right: `○ not recording`, `◐ buffering`, or
   `● REC session`, plus the replay ID.
 

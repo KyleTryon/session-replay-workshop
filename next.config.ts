@@ -24,6 +24,7 @@ export default withSentryConfig(nextConfig, {
   // Upload a larger set of source maps for prettier stack traces
   widenClientFileUpload: true,
   // Route Sentry traffic through the app so ad blockers on workshop
-  // laptops don't eat your replays.
-  tunnelRoute: "/monitoring",
+  // laptops don't eat your replays. src/app/sentry-tunnel/route.ts
+  // handles it and forwards only the event, not cookies or headers.
+  tunnelRoute: "/sentry-tunnel",
 });
