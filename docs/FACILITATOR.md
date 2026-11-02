@@ -1,5 +1,8 @@
 # Facilitator notes (spoilers)
 
+> Following along live? Save this file for after the workshop: it gives
+> away the planted bugs.
+
 Three bugs are planted in the app. None of them are obvious from a stack
 trace alone, which is the point: replay is how you find them.
 

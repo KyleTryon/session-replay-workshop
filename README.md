@@ -11,6 +11,9 @@ You need Node.js 20.19+ and [pnpm](https://pnpm.io/installation)
 (`corepack enable` picks up the version pinned in `package.json`).
 
 ```bash
+git clone https://github.com/TechSquidTV/session-replay-workshop.git
+cd session-replay-workshop
+git checkout 00-start
 pnpm install
 pnpm dev
 ```
@@ -231,6 +234,14 @@ In this app the drop is at **Abstract**, and the replays show why.
 
 ## Use it in your app
 
+The reusable part is two files. Everything else is the demo app.
+
+| File | What it is |
+|---|---|
+| `src/lib/replay/policies.ts` | The rules: the innermost provider wins, Replay is kept in sync with it, buffers are sent on errors and on leave. No React. |
+| `src/components/session-replay-provider.tsx` | The React part: `<SessionReplayProvider>` and `useSessionReplay()`. |
+| `src/components/replay-debug-badge.tsx` | Optional, for development: shows what Replay is doing right now. |
+
 1. Add `replayIntegration()` to `Sentry.init` with both replay sample rates
    at 0.
 2. Copy `src/lib/replay/policies.ts` and
@@ -238,6 +249,14 @@ In this app the drop is at **Abstract**, and the replays show why.
 3. Wrap the parts of your app you care about in `<SessionReplayProvider>`.
    Anything outside one isn't recorded, unless you put a default provider
    in your root layout.
+
+Not on Next.js? Change the `@sentry/nextjs` imports to `@sentry/react` (or
+`@sentry/browser` for `policies.ts`). Nothing else in those files is
+Next.js-specific.
+
+`sendOnLeave` only fires when someone navigates elsewhere inside your app.
+Closing the tab, refreshing, or typing another URL never unmounts the
+provider, so that buffer isn't sent.
 
 ## Try it on `main`
 
