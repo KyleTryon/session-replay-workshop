@@ -22,7 +22,7 @@ type ActivePolicy = ReplayPolicy & { depth: number };
 // queued tasks below make Replay match.
 const active = new Map<string, ActivePolicy>();
 let wanted: ReplayMode = "off";
-let current = "none";
+let currentPolicy = "none";
 // One roll per policy per page load, so leaving and coming back
 // isn't a second chance to be sampled.
 const rolls = new Map<string, boolean>();
@@ -46,8 +46,8 @@ function update() {
 
   if (policy && !rolls.has(policy.name)) rolls.set(policy.name, Math.random() < policy.sampleRate);
   wanted = policy && rolls.get(policy.name) ? policy.mode : "off";
-  current = policy?.name ?? "none";
-  Sentry.setTag("replay.policy", current);
+  currentPolicy = policy?.name ?? "none";
+  Sentry.setTag("replay.policy", currentPolicy);
   enqueue(apply);
 }
 
@@ -83,7 +83,7 @@ async function sendIfGone(id: string, name: string) {
   // The tag already names the next section; send the buffer under its own.
   Sentry.setTag("replay.policy", name);
   await replay.flush();
-  Sentry.setTag("replay.policy", current);
+  Sentry.setTag("replay.policy", currentPolicy);
 }
 
 let watching = false;
